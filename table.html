@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <!-- npm install jqueryする場合はコメントアウトはずしてね　 -->
+    <!-- <script type="text/javascript" src="./node_modules/jquery/dist/jquery.min.js"></script> -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <title>strict words test</title>
+</head>
+<body>
+    <textarea class="textarea" name="tsv" id="tsv-input" placeholder="Gootle Spread SheetまたはExcelからコピペする（２行のものに限る）"></textarea>
+    <button id="tsv-button" class="button">tsvを反映</button>
+    <table class="table">
+        <thead>
+            <th>表</th>
+            <th>裏</th>
+        </thead>
+        <tbody id="table-main">
+        </tbody>
+    </table>
+    <button class="button is-info" id="marutuke">採点する！</button>
+    <button class="button is-link" id="retry" disabled="disabled">もう一回！</button>
+    <button class="button is-success" id="shuffle">シャッフル！</button>
+    <p id="score"></p>
+    <script>
+        //var tsv is the TSV file with headers
+        function tsvJSON(tsv){ 
+            var lines=tsv.split("\n");
+            var result = [];
+            for(var i=0;i<lines.length;i++){
+                var obj = {"front":{"text":""},"back":{"text":""},"checked":false}
+
+                var currentline=lines[i].split("\t");
+                obj.front.text = currentline[0];
+                obj.back.text = currentline[1];
+
+                result.push(obj);
+        
+            }
+            
+            return result; //JavaScript object
+            // return JSON.stringify(result); //JSON 
+        }
+        function shuffle(list) {
+            var i = list.length;
+            
+            while (--i) {
+                var j = Math.floor(Math.random() * (i + 1));
+                if (i == j) continue;
+                var k = list[i];
+                list[i] = list[j];
+                list[j] = k;
+            }
+            
+            return list;
+        }
+
+        function getScore(data){
+            var score = 0;
+            for(i of data){
+                if(i.checked){
+                    score++;
+                }
+            }
+            return score;
+        }
+
+        const originalData = {"name":"ロシア語名詞","comment":"です！","cards":[{"front":{"text":"песня"},"back":{"text":"歌"},"checked":false},{"front":{"text":"любовь"},"back":{"text":"愛"},"checked":false},{"front":{"text":"мечта"},"back":{"text":"夢"},"checked":false},{"front":{"text":"надежда"},"back":{"text":"希望"},"checked":false},{"front":{"text":"Счастье"},"back":{"text":"幸福"},"checked":false},{"front":{"text":"яблоко"},"back":{"text":"りんご"},"checked":false},{"front":{"text":"сахар"},"back":{"text":"砂糖"},"checked":false},{"front":{"text":"лимон"},"back":{"text":"レモン"},"checked":false},{"front":{"text":"картошка"},"back":{"text":"じゃがいも"},"checked":false},{"front":{"text":"Шоколад"},"back":{"text":"チョコレート"},"checked":false},{"front":{"text":"Ягода"},"back":{"text":"いちご"},"checked":false},{"front":{"text":"колбаса"},"back":{"text":"ソーセージ"},"checked":false},{"front":{"text":"яйцо"},"back":{"text":"卵"},"checked":false},{"front":{"text":"бутерброд"},"back":{"text":"オープンサンド"},"checked":false},{"front":{"text":"салат"},"back":{"text":"サラダ"},"checked":false},{"front":{"text":"торт"},"back":{"text":"タルト"},"checked":false},{"front":{"text":"детство"},"back":{"text":"幼年期"},"checked":false},{"front":{"text":"сердце"},"back":{"text":"心"},"checked":false},{"front":{"text":"горло"},"back":{"text":"のど"},"checked":false},{"front":{"text":"голова"},"back":{"text":"頭"},"checked":false},{"front":{"text":"подруга"},"back":{"text":"女友達"},"checked":false},{"front":{"text":"друг"},"back":{"text":"友人"},"checked":false},{"front":{"text":"продавец"},"back":{"text":"販売員"},"checked":false},{"front":{"text":"повар"},"back":{"text":"コック"},"checked":false},{"front":{"text":"кошка"},"back":{"text":"猫"},"checked":false},{"front":{"text":"собака"},"back":{"text":"犬"},"checked":false},{"front":{"text":"семья"},"back":{"text":"家族"},"checked":false},{"front":{"text":"Книга"},"back":{"text":"本"},"checked":false},{"front":{"text":"машина"},"back":{"text":"自動車"},"checked":false},{"front":{"text":"урок"},"back":{"text":"授業"},"checked":false},{"front":{"text":"работа"},"back":{"text":"仕事・職場"},"checked":false},{"front":{"text":"обед"},"back":{"text":"昼食"},"checked":false},{"front":{"text":"ужин"},"back":{"text":"夕食"},"checked":false},{"front":{"text":"родина"},"back":{"text":"祖国・故郷"},"checked":false},{"front":{"text":"магазин"},"back":{"text":"店"},"checked":false},{"front":{"text":"деревня"},"back":{"text":"村"},"checked":false},{"front":{"text":"ресторан"},"back":{"text":"レストラン"},"checked":false},{"front":{"text":"город"},"back":{"text":"町"},"checked":false},{"front":{"text":"библиотека"},"back":{"text":"図書館"},"checked":false},{"front":{"text":"словарь"},"back":{"text":"辞書"},"checked":false}]}
+        var data = originalData.cards
+        var score = 0
+		$(document).ready(function () {
+			$(function(){
+				for( i of data){
+                    $("#table-main").append("<tr><td>" + i.front.text + "</td><td><input style=border:none;outline:none; type='text' id=t-"+ i.front.text + "></td></tr>");
+				}
+			});
+		});
+
+        $(function() {
+            $(document).on("keydown", "input", function(e) {
+                var n = $("input").length;
+                if (e.which == 13) {
+                    e.preventDefault();
+                    var Index = $('input').index(this);
+                    var nextIndex = $('input').index(this) + 1;
+                    if (nextIndex < n) {
+                        $('input')[nextIndex].focus();   // 次の要素へフォーカスを移動
+                        $('input')[nextIndex].parent("td").parent("tr").css("background-color","yellow");
+                    } else {
+                        $('input')[Index].blur();        // 最後の要素ではフォーカスを外す
+                    }
+                }
+            });
+
+            $("#marutuke").on("click",function(){
+                if(!$(".answer").length){
+                    var answer = [];
+                    $("thead > tr").append('<th class="answer">答え</th>');
+                    for(var i=0;i< data.length; i++){
+                        var txt = data[i].front.text;
+                        var ansData = data[i].back.text;
+                        answer.push($("#t-"+ txt).val())
+                        if(answer[i]===ansData){
+                            $("#t-"+ txt).parents("td").after("<td class='answer'>" + ansData + "</td>");
+                            $("#t-"+ txt).parent().siblings(".answer").css("background-color","green");
+                            data[i].checked = true;
+                        }else{
+                            $("#t-"+ txt).parents("td").after("<td class='answer'>" + ansData + "</td>");
+                            $("#t-"+ txt).parent().siblings(".answer").css("background-color","red");
+                        }
+                    }
+                    $("#retry").prop("disabled",false);
+                    $("#score").text(data.length + "点満点中，" + getScore(data) + "点でした！！");
+                }
+            });
+
+            $("#retry").on("click",function(){
+                $(".answer").remove();
+                $("tbody").empty();
+                $(function(){
+                    for( i of data){
+                        if(i.checked===false){
+                            $("#table-main").append("<tr><td>" + i.front.text + "</td><td><input style=border:none;outline:none; type='text' id=t-"+ i.front.text + "></td></tr>");
+                        }
+                    }
+                });
+            });
+
+            $("#shuffle").on("click",function(){
+                $(".answer").remove();
+                data = shuffle(data);
+                $("tbody").empty();
+                $(function(){
+                    for( i of data){
+                        if(i.checked===false){
+                            $("#table-main").append("<tr><td>" + i.front.text + "</td><td><input style=border:none;outline:none; type='text' id=t-"+ i.front.text + "></td></tr>");
+                        }
+                    }
+                });
+            })
+
+            $("#tsv-button").on("click",function(){
+                var tsv_txt = $("#tsv-input").val();
+                data = Object(tsvJSON(tsv_txt));
+                console.log(data);
+                $("tbody").empty();
+                $(function(){
+                    for( i of data){
+                        if(i.checked===false){
+                            $("#table-main").append("<tr><td>" + i.front.text + "</td><td><input style=border:none;outline:none; type='text' id=t-"+ i.front.text + "></td></tr>");
+                        }
+                    }
+                });
+            })
+        })
+    </script>
+</body>
+</html>
